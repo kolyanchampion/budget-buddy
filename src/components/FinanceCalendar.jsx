@@ -40,35 +40,57 @@ export default function FinanceCalendar({ transactions, settings, rates }) {
   };
 
   const selectedTransactions = getDayTransactions(selectedDate);
+  const formatCalendarAmount = (amount) => {
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: displayCurrency,
+        currencyDisplay: 'narrowSymbol',
+        maximumFractionDigits: 0
+      }).format(amount);
+    } catch {
+      return formatMoney(amount, displayCurrency).replace(/([.,]00)/, '');
+    }
+  };
 
   return (
-    <div className="glass-card overflow-hidden grid grid-cols-1 lg:grid-cols-3 w-full">
-      
-      {/* Calendar View */}
-      <div className="lg:col-span-2 p-4 sm:p-6 border-b lg:border-b-0 lg:border-r border-[var(--border)] overflow-x-auto">
-        <div className="flex justify-between items-center mb-4 sm:mb-6 min-w-[280px]">
-          <h2 className="text-lg sm:text-xl font-bold text-[var(--text)] font-heading">
+    <section className="finance-calendar-card glass-card">
+      <div className="finance-calendar-card__main">
+        <header className="calendar-header">
+          <h2 className="calendar-title">
             {format(currentDate, dateFormat)}
           </h2>
-          <div className="flex gap-1 sm:gap-2">
-            <button onClick={prevMonth} className="p-2 bg-[var(--surface-elevated)] hover:bg-[var(--bg-soft)] rounded-lg transition-colors text-[var(--text-muted)] hover:text-[var(--text)]">
-              <ChevronLeft size={20} />
+
+          <div className="calendar-nav">
+            <button 
+              onClick={prevMonth} 
+              className="calendar-nav-button"
+              type="button"
+              aria-label="Previous month"
+            >
+              <ChevronLeft size={18} />
             </button>
-            <button onClick={nextMonth} className="p-2 bg-[var(--surface-elevated)] hover:bg-[var(--bg-soft)] rounded-lg transition-colors text-[var(--text-muted)] hover:text-[var(--text)]">
-              <ChevronRight size={20} />
+
+            <button 
+              onClick={nextMonth} 
+              className="calendar-nav-button"
+              type="button"
+              aria-label="Next month"
+            >
+              <ChevronRight size={18} />
             </button>
           </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-7 mb-2 min-w-[280px]">
+        <div className="calendar-weekdays">
           {weekDays.map(day => (
-            <div key={day} className="text-center font-bold text-[10px] sm:text-xs text-[var(--text-muted)] uppercase tracking-wider py-1 sm:py-2">
+            <div key={day} className="calendar-weekday">
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 min-w-[280px]">
+        <div className="calendar-grid">
           {days.map((day, idx) => {
             const dayTxs = getDayTransactions(day);
             const { income, expense } = getDayTotals(dayTxs);
@@ -76,52 +98,54 @@ export default function FinanceCalendar({ transactions, settings, rates }) {
             const isCurrentMonth = isSameMonth(day, monthStart);
             const isTodayDate = isToday(day);
 
+            const dayClassName = [
+              'calendar-day',
+              !isCurrentMonth ? 'calendar-day--muted' : '',
+              isSelected ? 'calendar-day--selected' : '',
+              isTodayDate ? 'calendar-day--today' : '',
+            ].filter(Boolean).join(' ');
+
             return (
-              <div 
+              <button
                 key={idx}
+                type="button"
                 onClick={() => setSelectedDate(day)}
-                className={`min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 border rounded-lg sm:rounded-xl cursor-pointer transition-all flex flex-col ${
-                  !isCurrentMonth ? 'opacity-30 bg-[var(--bg-soft)] border-transparent' : 
-                  isSelected ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-sm' : 
-                  isTodayDate ? 'border-[var(--border)] bg-[var(--surface-elevated)]' : 
-                  'border-[var(--border)] bg-[var(--surface)] hover:border-[var(--primary)]/50'
-                }`}
+                className={dayClassName}
               >
-                <span className={`text-xs sm:text-sm font-semibold mb-1 ${
-                  isTodayDate ? 'text-[var(--primary)]' : 
-                  isSelected ? 'text-[var(--primary-hover)]' : 'text-[var(--text)]'
-                }`}>
+                <span className="calendar-day__number">
                   {format(day, 'd')}
                 </span>
                 
-                <div className="mt-auto space-y-0.5 sm:space-y-1 overflow-hidden">
+                <div className="calendar-day__totals">
                   {income > 0 && (
-                    <div className="text-[9px] sm:text-[10px] font-bold text-[var(--income)] bg-[var(--income)]/10 px-1 py-0.5 rounded truncate">
-                      +{formatMoney(income, displayCurrency)}
-                    </div>
+                    <span className="calendar-day__amount calendar-day__amount--income">
+                      +{formatCalendarAmount(income)}
+                    </span>
                   )}
+
                   {expense > 0 && (
-                    <div className="text-[9px] sm:text-[10px] font-bold text-[var(--expense)] bg-[var(--expense)]/10 px-1 py-0.5 rounded truncate">
-                      -{formatMoney(expense, displayCurrency)}
-                    </div>
+                    <span className="calendar-day__amount calendar-day__amount--expense">
+                      -{formatCalendarAmount(expense)}
+                    </span>
                   )}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
 
-      {/* Daily Details View */}
-      <div className="bg-[var(--bg-soft)] p-4 sm:p-6 flex flex-col w-full">
-        <h3 className="text-base sm:text-lg font-bold text-[var(--text)] mb-4 sm:mb-6 pb-4 border-b border-[var(--border)] flex items-center gap-2">
-          <CalendarIcon size={20} className="text-[var(--primary)]" />
-          <span className="truncate">{format(selectedDate, 'EEEE, MMM d')}</span>
-        </h3>
+      <aside className="calendar-activity-panel">
+        <header className="calendar-activity-panel__header">
+          <CalendarIcon size={18} className="calendar-activity-panel__icon" />
+          <h3 className="calendar-activity-panel__title">
+            {format(selectedDate, 'EEEE, MMM d')}
+          </h3>
+        </header>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[300px] sm:max-h-[400px]">
+        <div className="calendar-activity-panel__body custom-scrollbar">
           {selectedTransactions.length === 0 ? (
-            <div className="h-full flex items-center justify-center py-8 sm:py-12">
+            <div className="calendar-empty-state">
               <EmptyState 
                 icon={<CalendarIcon size={24} />}
                 title="No activity"
@@ -129,25 +153,27 @@ export default function FinanceCalendar({ transactions, settings, rates }) {
               />
             </div>
           ) : (
-            <div className="space-y-3 pr-2">
+            <div className="calendar-activity-list">
               {selectedTransactions.map(t => {
                 const converted = convertAmount(t.amount_base, t.base_currency, displayCurrency, rates);
+
                 return (
-                  <div key={t.id} className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)] shadow-sm flex flex-wrap justify-between items-center gap-2">
-                    <div className="truncate flex-1 pr-2">
-                      <p className="text-sm font-semibold text-[var(--text)] truncate">{t.title}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{t.category}</p>
+                  <article key={t.id} className="calendar-activity-item">
+                    <div className="calendar-activity-item__content">
+                      <p className="calendar-activity-item__title">{t.title}</p>
+                      <p className="calendar-activity-item__category">{t.category}</p>
                     </div>
-                    <div className={`text-sm font-bold flex-shrink-0 ${t.type === 'income' ? 'text-[var(--income)]' : 'text-[var(--text)]'}`}>
+
+                    <div className={`calendar-activity-item__amount ${t.type === 'income' ? 'is-income' : 'is-expense'}`}>
                       {t.type === 'income' ? '+' : '-'}{formatMoney(converted, displayCurrency)}
                     </div>
-                  </div>
+                  </article>
                 );
               })}
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </aside>
+    </section>
   );
 }
