@@ -2,65 +2,89 @@ import React, { useState } from 'react';
 import { Wallet, Menu, X, Settings } from 'lucide-react';
 import SettingsModal from './SettingsModal';
 
+const navItems = [
+  { label: 'Overview', href: '#overview' },
+  { label: 'Transactions', href: '#transactions' },
+  { label: 'Calendar', href: '#calendar' },
+  { label: 'Goals', href: '#goals' },
+  { label: 'Insights', href: '#insights' },
+];
+
 export default function Header({ user, settings, onUpdateSettings, onResetApp, onLogout, onUploadLocalData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   return (
     <>
-      <header className="sticky top-0 z-50 glass border-b border-[var(--border)] transition-colors w-full">
+      <header className="app-header sticky top-0 z-50 w-full">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center gap-2">
-              <div className="bg-[var(--primary)] p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-white">
+            <a href="#overview" className="brand-lockup" aria-label="Budget Buddy home">
+              <span className="brand-icon">
                 <Wallet size={20} className="sm:w-6 sm:h-6" />
-              </div>
-              <span className="font-bold text-lg sm:text-xl text-[var(--text)] font-heading">Budget Buddy</span>
-            </div>
+              </span>
+              <span className="brand-name">Budget Buddy</span>
+            </a>
 
-            <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-              <a href="#overview" className="text-sm text-[var(--text-muted)] hover:text-[var(--primary)] font-medium transition-colors">Overview</a>
-              <a href="#transactions" className="text-sm text-[var(--text-muted)] hover:text-[var(--primary)] font-medium transition-colors">Transactions</a>
-              <a href="#calendar" className="text-sm text-[var(--text-muted)] hover:text-[var(--primary)] font-medium transition-colors">Calendar</a>
-              <a href="#goals" className="text-sm text-[var(--text-muted)] hover:text-[var(--primary)] font-medium transition-colors">Goals</a>
-              <a href="#insights" className="text-sm text-[var(--text-muted)] hover:text-[var(--primary)] font-medium transition-colors">Insights</a>
+            <nav className="hidden md:flex items-center gap-2">
+              {navItems.map((item) => (
+                <a key={item.href} href={item.href} className="nav-link">
+                  {item.label}
+                </a>
+              ))}
             </nav>
 
-            <div className="hidden md:flex items-center gap-4">
-              {user && <span className="text-xs font-medium text-[var(--text-muted)] max-w-[150px] truncate">{user.email}</span>}
+            <div className="hidden md:flex items-center gap-3">
+              {user && (
+                <span className="user-email">
+                  {user.email}
+                </span>
+              )}
+
               <button 
                 onClick={() => setShowSettings(true)}
-                className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-soft)] hover:text-[var(--text)] rounded-lg transition-colors"
+                className="icon-button"
                 aria-label="Settings"
+                type="button"
               >
                 <Settings size={20} />
               </button>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2 md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
               <button 
                 onClick={() => setShowSettings(true)}
-                className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-soft)] rounded-lg transition-colors"
+                className="icon-button"
+                aria-label="Settings"
+                type="button"
               >
                 <Settings size={20} />
               </button>
+
               <button 
-                className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-soft)] rounded-lg transition-colors"
+                className="icon-button"
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? 'Close menu' : 'Open menu'}
+                type="button"
               >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                {isOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </div>
           </div>
         </div>
 
         {isOpen && (
-          <div className="md:hidden bg-[var(--surface)] border-b border-[var(--border)] px-4 pt-2 pb-4 space-y-3 shadow-lg absolute w-full left-0 top-[56px] sm:top-[64px]">
-            <a href="#overview" onClick={() => setIsOpen(false)} className="block text-[var(--text-muted)] hover:text-[var(--text)] font-medium py-2">Overview</a>
-            <a href="#transactions" onClick={() => setIsOpen(false)} className="block text-[var(--text-muted)] hover:text-[var(--text)] font-medium py-2">Transactions</a>
-            <a href="#calendar" onClick={() => setIsOpen(false)} className="block text-[var(--text-muted)] hover:text-[var(--text)] font-medium py-2">Calendar</a>
-            <a href="#goals" onClick={() => setIsOpen(false)} className="block text-[var(--text-muted)] hover:text-[var(--text)] font-medium py-2">Goals</a>
-            <a href="#insights" onClick={() => setIsOpen(false)} className="block text-[var(--text-muted)] hover:text-[var(--text)] font-medium py-2">Insights</a>
+          <div className="mobile-nav md:hidden">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className="mobile-nav-link"
+              >
+                {item.label}
+              </a>
+            ))}
           </div>
         )}
       </header>
