@@ -13,12 +13,12 @@ export default function AuthPanel({ user, onUploadData, onLogout }) {
 
   if (!isSupabaseConfigured && !user) {
     return (
-      <div className="p-4 bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800/50 rounded-xl">
-        <h4 className="font-bold text-orange-800 dark:text-orange-400 mb-2">Supabase is not configured</h4>
-        <p className="text-sm text-orange-700 dark:text-orange-300">
+      <div className="auth-warning">
+        <h4>Supabase is not configured</h4>
+        <p>
           Create a <code>.env</code> file with <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code>, then restart <code>npm run dev</code> to enable cloud sync.
         </p>
-        <p className="text-sm text-orange-700 dark:text-orange-300 mt-2 font-medium">
+        <p className="auth-warning__note">
           You are currently in Guest mode.
         </p>
       </div>
@@ -39,6 +39,7 @@ export default function AuthPanel({ user, onUploadData, onLogout }) {
       
       const localTxs = getTransactions();
       const localGoals = getGoals();
+
       if (localTxs.length > 0 || localGoals.length > 0) {
         setShowSyncPrompt(true);
       }
@@ -56,16 +57,18 @@ export default function AuthPanel({ user, onUploadData, onLogout }) {
 
   if (showSyncPrompt) {
     return (
-      <div className="p-4 bg-[var(--bg-soft)] rounded-xl border border-[var(--border)]">
-        <h4 className="font-bold text-[var(--primary)] mb-2">Sync Local Data?</h4>
-        <p className="text-sm text-[var(--text-muted)] mb-4">
+      <div className="auth-card">
+        <h4 className="auth-card__title">Sync Local Data?</h4>
+        <p className="auth-card__text">
           You have local transactions and goals. Do you want to upload them to your account?
         </p>
-        <div className="flex gap-2">
-          <button onClick={handleUpload} className="px-3 py-1.5 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:bg-[var(--primary-hover)]">
+
+        <div className="auth-actions">
+          <button onClick={handleUpload} className="auth-button auth-button--primary" type="button">
             Upload local data
           </button>
-          <button onClick={() => setShowSyncPrompt(false)} className="px-3 py-1.5 bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] text-sm font-medium rounded-lg hover:bg-[var(--bg-soft)]">
+
+          <button onClick={() => setShowSyncPrompt(false)} className="auth-button auth-button--secondary" type="button">
             Keep cloud data
           </button>
         </div>
@@ -75,17 +78,21 @@ export default function AuthPanel({ user, onUploadData, onLogout }) {
 
   if (user) {
     return (
-      <div className="space-y-4">
-        <div className="p-4 bg-[var(--bg-soft)] rounded-xl border border-[var(--border)]">
-          <p className="text-sm text-[var(--text-muted)] mb-1">Logged in as</p>
-          <p className="font-bold text-[var(--text)]">{user.email}</p>
-          <div className="mt-3 flex items-center gap-2 text-sm text-[var(--income)]">
-            <span className="w-2 h-2 rounded-full bg-[var(--income)]"></span> Cloud sync enabled
+      <div className="auth-stack">
+        <div className="auth-card">
+          <p className="auth-card__label">Logged in as</p>
+          <p className="auth-card__email">{user.email}</p>
+
+          <div className="auth-sync-status">
+            <span />
+            Cloud sync enabled
           </div>
         </div>
+
         <button 
           onClick={onLogout}
-          className="w-full py-2 bg-[var(--surface-muted)] hover:bg-[var(--border)] text-[var(--text)] rounded-lg text-sm font-medium transition-colors"
+          className="auth-button auth-button--secondary auth-button--full"
+          type="button"
         >
           Log Out
         </button>
@@ -94,59 +101,63 @@ export default function AuthPanel({ user, onUploadData, onLogout }) {
   }
 
   return (
-    <div>
-      <div className="flex border-b border-[var(--border)] mb-4">
+    <div className="auth-panel">
+      <div className="auth-tabs">
         <button
-          className={`pb-2 px-4 text-sm font-medium border-b-2 transition-colors ${isLogin ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'}`}
+          className={`auth-tab ${isLogin ? 'is-active' : ''}`}
           onClick={() => { setIsLogin(true); setError(''); }}
+          type="button"
         >
           Log In
         </button>
+
         <button
-          className={`pb-2 px-4 text-sm font-medium border-b-2 transition-colors ${!isLogin ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'}`}
+          className={`auth-tab ${!isLogin ? 'is-active' : ''}`}
           onClick={() => { setIsLogin(false); setError(''); }}
+          type="button"
         >
           Sign Up
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="auth-form">
         {error && (
-          <div className="p-3 bg-[var(--expense)]/10 text-[var(--expense)] border border-[var(--expense)]/20 text-sm rounded-lg">
+          <div className="auth-error">
             {error}
           </div>
         )}
-        <div>
-          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Email</label>
+
+        <div className="auth-field">
+          <label>Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-[var(--input-bg)] text-[var(--input-text)]"
             required
           />
         </div>
-        <div>
-          <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Password</label>
+
+        <div className="auth-field">
+          <label>Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-[var(--input-bg)] text-[var(--input-text)]"
             required
           />
         </div>
+
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+          className="auth-button auth-button--primary auth-button--full"
         >
           {loading ? 'Please wait...' : (isLogin ? 'Log In' : 'Sign Up')}
         </button>
       </form>
       
       {!user && (
-        <p className="mt-4 text-xs text-[var(--text-muted)] text-center">
+        <p className="auth-helper">
           Guest mode: data is saved only on this device. Log in to sync to the cloud.
         </p>
       )}
