@@ -1,13 +1,26 @@
-# Local environment files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Contributing
 
-# Editor folders
-.vscode/
-.idea/
+Thank you for your interest in contributing to this project.
 
-# Temporary files
-*.tmp
-*.temp
+## How to contribute
+
+1. Fork the repository.
+2. Create a new branch for your changes.
+3. Make your changes.
+4. Commit your work with a clear commit message.
+5. Open a pull request and describe what you changed.
+
+## Reporting issues
+
+If you find a bug or have a suggestion, please open an issue with a clear description and steps to reproduce the problem, if applicable.
+
+## Pull request guidelines
+
+- Keep changes focused and easy to review.
+- Use clear commit messages.
+- Make sure your changes do not break existing functionality.
+- Add screenshots or examples when helpful.
+
+## Code of conduct
+
+Please be respectful and constructive when discussing changes or reviewing contributions.
